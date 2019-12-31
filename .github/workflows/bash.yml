@@ -10,7 +10,7 @@ jobs:
         env: 
           LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
         run: |
-          wget https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${LICENSE_KEY}&suffix=tar.gz -O ./GeoLite2-Country.tar.gz
+          wget -O ./GeoLite2-Country.tar.gz "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${LICENSE_KEY}&suffix=tar.gz"
           tar zxvf ./GeoLite2-Country.tar.gz -C .
           mv ./GeoLite2-Country_*/GeoLite2-Country.mmdb ./Country.mmdb
 
