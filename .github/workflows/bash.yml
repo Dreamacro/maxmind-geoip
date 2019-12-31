@@ -1,0 +1,23 @@
+name: bash
+on: [push]
+jobs:
+
+  build:
+    name: Pull and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download file
+        env: 
+          LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
+        run: |
+          wget https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${LICENSE_KEY}&suffix=tar.gz -O ./GeoLite2-Country.tar.gz
+          tar zxvf ./GeoLite2-Country.tar.gz -C .
+          mv ./GeoLite2-Country_*/GeoLite2-Country.mmdb ./Country.mmdb
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: Country.mmdb
