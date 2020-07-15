@@ -1,0 +1,23 @@
+name: Monthly Build
+
+on:
+  schedule:
+    - cron: 0 0 12 * *
+
+jobs:
+  build:
+    name: Pull and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Push Tag
+        run: |
+          git config --global user.name 'Dreamacro'
+          git config --global user.email 'dreamacro@users.noreply.github.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git tag $(date +%Y%m%d)
+          git push origin $(date +%Y%m%d)
