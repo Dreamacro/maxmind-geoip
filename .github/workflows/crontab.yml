@@ -1,39 +1,22 @@
-name: Monthly Build
+name: Weekly Build
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 0 12 * *
+    - cron: 0 22 * * FRI
 
 jobs:
   build:
     name: Pull and Release
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repo
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      
-      - name: git tag
-        uses: actions/github-script@v2
-        id: tag
-        with:
-          script: |
-            const now = new Date()
-            return `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}`
-          result-encoding: string
-
-      - name: Push Tag
+      - name: Set variables
         run: |
-          git config --global user.name 'Dreamacro'
-          git config --global user.email 'dreamacro@users.noreply.github.com'
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-          git tag ${{steps.tag.outputs.result}}
-          git push origin ${{steps.tag.outputs.result}}
-      
+          echo "tag=$(date +%Y%m%d)" >> $GITHUB_ENV
+        shell: bash
+
       - name: Download file
-        env: 
+        env:
           LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
         run: |
           wget -O ./GeoLite2-Country.tar.gz "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${LICENSE_KEY}&suffix=tar.gz"
@@ -46,4 +29,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: Country.mmdb
-          tag_name: ${{steps.tag.outputs.result}}
+          tag_name: ${{ env.tag }}
+
+      - name: Git push assets to "release" branch
+        run: |
+          git init
+          git config --local user.name "actions"
+          git config --local user.email "action@github.com"
+          git checkout -b release
+          git add Country.mmdb
+          git commit -m "${{ env.tag }}"
+          git remote add publish https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git push -f publish release
