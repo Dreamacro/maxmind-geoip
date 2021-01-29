@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
       
       - name: git tag
-        uses: actions/github-script@v2
+        uses: actions/github-script@v3
         id: tag
         with:
           script: |
@@ -38,12 +38,21 @@ jobs:
         run: |
           wget -O ./GeoLite2-Country.tar.gz "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${LICENSE_KEY}&suffix=tar.gz"
           tar zxvf ./GeoLite2-Country.tar.gz -C .
-          mv ./GeoLite2-Country_*/GeoLite2-Country.mmdb ./Country.mmdb
+          mkdir dist
+          mv ./GeoLite2-Country_*/GeoLite2-Country.mmdb ./dist/Country.mmdb
 
       - name: Upload Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: Country.mmdb
+          files: dist/Country.mmdb
           tag_name: ${{steps.tag.outputs.result}}
+      
+      - name: Upload to release branch
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: release
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
