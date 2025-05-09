@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
       - name: git tag
-        uses: actions/github-script@v3
+        uses: actions/github-script@v7
         id: tag
         with:
           script: |
@@ -42,7 +42,7 @@ jobs:
           mv ./GeoLite2-Country_*/GeoLite2-Country.mmdb ./dist/Country.mmdb
 
       - name: Upload Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -50,7 +50,7 @@ jobs:
           tag_name: ${{steps.tag.outputs.result}}
       
       - name: Upload to release branch
-        uses: crazy-max/ghaction-github-pages@v2
+        uses: crazy-max/ghaction-github-pages@v4
         with:
           target_branch: release
           build_dir: dist
